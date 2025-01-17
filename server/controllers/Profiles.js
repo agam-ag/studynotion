@@ -3,7 +3,7 @@ const CourseProgress = require("../models/CourseProgress")
 
 const Course = require("../models/Course")
 const User = require("../models/User")
-const { uploadImageToCloudinary } = require("../utils/imageUploader")
+const { uploadImageToCloudinary } = require("../utils/ImageUploader")
 const mongoose = require("mongoose")
 const { convertSecondsToDuration } = require("../utils/secToDuration")
 // Method for updating a profile
