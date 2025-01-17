@@ -1,6 +1,6 @@
 // Import necessary modules
-const Section = require("../models/Section")
-const SubSection = require("../models/Subsection")
+const Section = require("../models/Section.js")
+const SubSection = require("../models/SubSection.js")
 const { uploadImageToCloudinary } = require("../utils/ImageUploader.js")
 
 // Create a new sub-section for a given section
