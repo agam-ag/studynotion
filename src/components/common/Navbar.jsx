@@ -11,25 +11,6 @@ import { categories } from "../../services/apis"
 import { ACCOUNT_TYPE } from "../../utils/constants"
 import ProfileDropdown from "../core/Auth/ProfileDropDown"
 
-// const subLinks = [
-//   {
-//     title: "Python",
-//     link: "/catalog/python",
-//   },
-//   {
-//     title: "javascript",
-//     link: "/catalog/javascript",
-//   },
-//   {
-//     title: "web-development",
-//     link: "/catalog/web-development",
-//   },
-//   {
-//     title: "Android Development",
-//     link: "/catalog/Android Development",
-//   },
-// ];
-
 function Navbar() {
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.profile)
@@ -38,14 +19,14 @@ function Navbar() {
 
   const [subLinks, setSubLinks] = useState([])
   const [loading, setLoading] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false) // State for toggling mobile menu visibility
+  const [catalogOpen, setCatalogOpen] = useState(false) // State for toggling Catalog dropdown
 
   useEffect(() => {
     ;(async () => {
       setLoading(true)
       try {
         const res = await apiConnector("GET", categories.CATEGORIES_API)
-        console.log(res.data.data.map((l)=>l.name))
-        
         setSubLinks(res.data.data)
       } catch (error) {
         console.log("Could not fetch Categories.", error)
@@ -54,10 +35,16 @@ function Navbar() {
     })()
   }, [])
 
-  // console.log("sub links", subLinks)
-
   const matchRoute = (route) => {
     return matchPath({ path: route }, location.pathname)
+  }
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev)
+  }
+
+  const toggleCatalog = () => {
+    setCatalogOpen((prev) => !prev)
   }
 
   return (
@@ -71,49 +58,43 @@ function Navbar() {
         <Link to="/">
           <img src={logo} alt="Logo" width={160} height={32} loading="lazy" />
         </Link>
-        {/* Navigation links */}
+        {/* Navigation links for larger screens */}
         <nav className="hidden md:block">
           <ul className="flex gap-x-6 text-richblack-25">
             {NavbarLinks.map((link, index) => (
               <li key={index}>
                 {link.title === "Catalog" ? (
-                  <>
-                    <div
-                      className={`group relative flex cursor-pointer items-center gap-1 ${
-                        matchRoute("/catalog/:catalogName")
-                          ? "text-yellow-25"
-                          : "text-richblack-25"
-                      }`}
-                    >
-                      <p>{link.title}</p>
-                      <BsChevronDown />
-                      <div className="invisible absolute left-[50%] top-[50%] z-[1000] flex w-[200px] translate-x-[-50%] translate-y-[3em] flex-col rounded-lg bg-richblack-5 p-4 text-richblack-900 opacity-0 transition-all duration-150 group-hover:visible group-hover:translate-y-[1.65em] group-hover:opacity-100 lg:w-[300px]">
-                        <div className="absolute left-[50%] top-0 -z-10 h-6 w-6 translate-x-[80%] translate-y-[-40%] rotate-45 select-none rounded bg-richblack-5"></div>
-                        {loading ? (
-                          <p className="text-center">Loading...</p>
-                        ) : subLinks.length ? (
-                          <>
-                            {(subLinks && subLinks.length) && subLinks
-                              
-                              ?.map((subLink, i) => (
-                                <Link
-                                  to={`/catalog/${subLink.name
-                                    .split(" ")
-                                    .join("-")
-                                    .toLowerCase()}`}
-                                  className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50"
-                                  key={i}
-                                >
-                                  <p>{subLink.name}</p>
-                                </Link>
-                              ))}
-                          </>
-                        ) : (
-                          <p className="text-center">No Courses Found</p>
-                        )}
-                      </div>
+                  <div
+                    className={`group relative flex cursor-pointer items-center gap-1 ${
+                      matchRoute("/catalog/:catalogName")
+                        ? "text-yellow-25"
+                        : "text-richblack-25"
+                    }`}
+                  >
+                    <p>{link.title}</p>
+                    <BsChevronDown />
+                    <div className="invisible absolute left-[50%] top-[50%] z-[1000] flex w-[200px] translate-x-[-50%] translate-y-[3em] flex-col rounded-lg bg-richblack-5 p-4 text-richblack-900 opacity-0 transition-all duration-150 group-hover:visible group-hover:translate-y-[1.65em] group-hover:opacity-100 lg:w-[300px]">
+                      <div className="absolute left-[50%] top-0 -z-10 h-6 w-6 translate-x-[80%] translate-y-[-40%] rotate-45 select-none rounded bg-richblack-5"></div>
+                      {loading ? (
+                        <p className="text-center">Loading...</p>
+                      ) : subLinks.length ? (
+                        subLinks.map((subLink, i) => (
+                          <Link
+                            to={`/catalog/${subLink.name
+                              .split(" ")
+                              .join("-")
+                              .toLowerCase()}`}
+                            className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50"
+                            key={i}
+                          >
+                            <p>{subLink.name}</p>
+                          </Link>
+                        ))
+                      ) : (
+                        <p className="text-center">No Courses Found</p>
+                      )}
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <Link to={link?.path}>
                     <p
@@ -159,10 +140,80 @@ function Navbar() {
           )}
           {token !== null && <ProfileDropdown />}
         </div>
-        <button className="mr-4 md:hidden">
+        {/* Hamburger Menu Button */}
+        <button className="mr-4 md:hidden" onClick={toggleMenu}>
           <AiOutlineMenu fontSize={24} fill="#AFB2BF" />
         </button>
       </div>
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="absolute top-14 left-0 w-full bg-richblack-800 text-richblack-25 md:hidden z-20">
+          <ul className="flex flex-col items-center py-4">
+            {NavbarLinks.map((link, index) => (
+              <li key={index} className="w-full text-center py-2">
+                {link.title === "Catalog" ? (
+                  <div>
+                    <p
+                      className="cursor-pointer flex justify-center items-center gap-2"
+                      onClick={toggleCatalog}
+                    >
+                      {link.title} <BsChevronDown />
+                    </p>
+                    {catalogOpen && (
+                      <div className="flex flex-col items-center mt-2">
+                        {loading ? (
+                          <p>Loading...</p>
+                        ) : subLinks.length ? (
+                          subLinks.map((subLink, i) => (
+                            <Link
+                              to={`/catalog/${subLink.name
+                                .split(" ")
+                                .join("-")
+                                .toLowerCase()}`}
+                              className="py-2"
+                              key={i}
+                              onClick={() => {
+                                setCatalogOpen(false)
+                                setMenuOpen(false)
+                              }}
+                            >
+                              {subLink.name}
+                            </Link>
+                          ))
+                        ) : (
+                          <p>No Courses Found</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={link.path}
+                    onClick={() => setMenuOpen(false)}
+                    className="block w-full"
+                  >
+                    {link.title}
+                  </Link>
+                )}
+              </li>
+            ))}
+            {!token && (
+              <>
+                <li className="w-full text-center py-2">
+                  <Link to="/login" onClick={() => setMenuOpen(false)}>
+                    Log In
+                  </Link>
+                </li>
+                <li className="w-full text-center py-2">
+                  <Link to="/signup" onClick={() => setMenuOpen(false)}>
+                    Sign Up
+                  </Link>
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

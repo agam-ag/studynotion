@@ -21,11 +21,15 @@ export default function Instructor() {
       console.log(instructorApiData)
       if (instructorApiData.length) setInstructorData(instructorApiData)
       if (result) {
+        console.log(result)
         setCourses(result)
       }
       setLoading(false)
     })()
   }, [])
+
+  
+  
 
   const totalAmount = instructorData?.reduce(
     (acc, curr) => acc + curr.totalAmountGenerated,
@@ -97,7 +101,7 @@ export default function Instructor() {
               </Link>
             </div>
             <div className="my-4 flex items-start space-x-6">
-              {courses.slice(0, 3).map((course) => (
+              {Array.isArray(courses) && courses.slice(0, 3).map((course) => (
                 <div key={course._id} className="w-1/3">
                   <img
                     src={course.thumbnail}
@@ -110,7 +114,7 @@ export default function Instructor() {
                     </p>
                     <div className="mt-1 flex items-center space-x-2">
                       <p className="text-xs font-medium text-richblack-300">
-                        {course.studentsEnroled.length} students
+                        {course.studentsEnrolled.length} students
                       </p>
                       <p className="text-xs font-medium text-richblack-300">
                         |

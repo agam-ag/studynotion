@@ -151,7 +151,6 @@ function App() {
             </>
           )}
         </Route>
-
         {/* 404 Page */}
         <Route path="*" element={<Error />} />
       </Routes>
